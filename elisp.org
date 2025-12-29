@@ -1,6 +1,8 @@
 -*- mode: org; -*-
 #+FILETAGS: :projects:lisp
-
+* init
+** Add TRAMP for ssh onto work dev machines                  :easypost:emacs:
+DEADLINE: <2026-12-29 Tue>
 * websearch
 ** DONE - Open a new buffer for each eww instance opening a wikipedia link
 CLOSED: [2025-12-28 Sun 19:21] SCHEDULED: <2025-12-28 Sun>
