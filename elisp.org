@@ -1,0 +1,14 @@
+-*- mode: org; -*-
+#+FILETAGS: :projects:lisp
+
+* websearch
+** DONE - Open a new buffer for each eww instance opening a wikipedia link
+CLOSED: [2025-12-28 Sun 19:21] SCHEDULED: <2025-12-28 Sun>
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2025-12-28 Sun 19:21]
+:END:
+
+* word-count-tracking 
+** TODO Actually do this
+This would be so cool
+SCHEDULED: <2026-01-03 Sat>
