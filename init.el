@@ -13,6 +13,8 @@
 ;; Allow bundled packages to upgrade (used for seq package dependencies in Magit), generally useful even after building from source
 (setq package-install-upgrade-built-in t)
 
+
+
 ;; Tabs are just 4 spaces. I hate tabs!
 (setq indent-tabs-mode nil)
 (setq tab-width 4)
@@ -26,7 +28,7 @@
 ;; TODO - support multiple files
 (defun load-secret (key)
   (with-temp-buffer
-    (insert-file-contents "~/.secrets")
+    (insert-file-contents (file-name-concat user-emacs-directory ".secrets"))
     ;;let* evaluates sequentially, not parallel so we can use secrets list
     (let* (
 	  (secrets-list (split-string (buffer-string) "\n" t)) ; Get each line. 't' omits empty strings
@@ -74,6 +76,8 @@
   :ensure t
   :after evil-org
   :config
+  (if (file-directory-p "~/org/") () (make-directory "~/org"))
+  (if (file-directory-p "~/org/todos") () (make-directory "~/org/todos"))
   ;; Allows us to do advanced TODO tracking
   ;; The @ and ! are just timestamp tracking. We could theoretically log more if you rtfm
   (setq org-todo-keywords '((sequence "TODO(t!)" "SHELVED(s!)" "IN PROGRESS(p!)" "|" "IDEA(i)" "PROJECT(j)" "DONE(d!)" "WRITING(r)" "CANCELED(c@)")))
@@ -131,8 +135,10 @@
 	 (directory-files-recursively "~/org/todos/" "\\.org$")
 	 ;; TODO target certain files here
 	 ;; Only certain projects for size reasons
-	 (directory-files-recursively "~/projects/" "\\.org$")
-	 )
+	 (if (file-directory-p "~/projects/")
+	     (directory-files-recursively "~/projects/" "\\.org$")
+	     ()
+	 ))
     )
    )
   )
@@ -340,6 +346,11 @@
 ;; TODO
 (load-file (file-name-concat user-emacs-directory "christophers-custom-emacs" "web-search.el"))
 (require 'web-search)
+
+;; Settings for my work mac to force to use gls since I have "advanced ordering" lol
+(when (eq system-type 'darwin)
+  (setq insert-directory-program "gls"
+        dired-use-ls-dired t))
 
 
 (custom-set-variables
