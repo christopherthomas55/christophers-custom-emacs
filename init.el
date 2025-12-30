@@ -64,8 +64,24 @@
 
 ;; Magit git
 (use-package magit
+  :ensure t)
+
+(use-package tramp
   :ensure t
-  )
+  :config
+  (tramp-parse-sconfig "~/.ssh/config")
+  (setq tramp-default-method "ssh")
+  
+  ;; SPEED FIXES - cache for 200 seconds
+  (setq remote-file-name-inhibit-cache 200)
+  (setq vc-handled-backends '(Git)) ; Faster: only checks for Git. TBH I don't know exactly what this does but I'm trying to speed up tramp
+  (setq tramp-verbose 1)            ; Reduce logging
+
+  (defun ssh ()
+    "Open find-file pre-populated with the SSH prefix."
+    (interactive)
+    (find-file (read-file-name "Remote file: " "/ssh:")))
+)
 
 ;; Let's connect magit to github
 (use-package forge
@@ -311,6 +327,32 @@
   (global-set-key (kbd "C-c g") 'gptel-new-session)
 )
 
+;; Dired in sidebar and toggle open dir with tab
+;; TODO Look into dired-ranger and abo abo's dired hacks in general
+(use-package dired-sidebar
+  :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
+  :ensure t
+  :commands (dired-sidebar-toggle-sidebar)
+  :init
+  ;(add-hook 'dired-sidebar-mode-hook
+  ;; Commented is recommended from author. Idk so not turning on
+  ;          (lambda ()
+  ;            (unless (file-remote-p default-directory)
+  ;              (auto-revert-mode))))
+  :config
+  ;(push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
+  ;(push 'rotate-windows dired-sidebar-toggle-hidden-commands)
+  (setq dired-sidebar-subtree-line-prefix "---")
+  (setq dired-sidebar-theme 'icon)
+  )
+
+(use-package dired-subtree
+        :ensure t
+        :bind (:map dired-mode-map
+                    ("<tab>" . dired-subtree-toggle))
+	)
+		    
+
 ;; TODO copilot
 
 ;; w3m
@@ -353,10 +395,17 @@
 (load-file (file-name-concat user-emacs-directory "christophers-custom-emacs" "web-search.el"))
 (require 'web-search)
 
-;; Settings for my work mac to force to use gls since I have "advanced ordering" lol
+;; Settings for my work mac
 (when (eq system-type 'darwin)
-  (setq insert-directory-program "gls"
-        dired-use-ls-dired t))
+  (progn
+        ;; use gls since I have "advanced ordering" lol
+	(setq insert-directory-program "gls"
+              dired-use-ls-dired t)
+	;; Default font size bigger
+	(set-face-attribute 'default nil :height 175)
+
+	)
+)
 
 
 (custom-set-variables
