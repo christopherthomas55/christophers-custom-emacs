@@ -71,16 +71,33 @@
   :config
   (tramp-parse-sconfig "~/.ssh/config")
   (setq tramp-default-method "ssh")
+
+  ;; All from this great article https://coredumped.dev/2025/06/18/making-tramp-go-brrrr./
+  (connection-local-set-profile-variables
+   'remote-direct-async-process
+   '((tramp-direct-async-process . t)))
+  (connection-local-set-profiles
+   '(:application tramp :protocol "ssh") ; Changed from "scp"
+   'remote-direct-async-process)
   
   ;; SPEED FIXES - cache for 200 seconds
-  (setq remote-file-name-inhibit-cache 200)
-  (setq vc-handled-backends '(Git)) ; Faster: only checks for Git. TBH I don't know exactly what this does but I'm trying to speed up tramp
+  (setq remote-file-name-inhibit-cache 200) ;; Can't make null....cause claude code will run
+  (setq remote-file-name-inhibit-locks t)  ;; Can do this if one emacs session
+  (setq remote-use-scp-direct-remote-copying t)
+  (setq remote-file-name-inhibit-auto-save-visited t)
+
+  (setq vc-handled-backends '(Git)) ; Faster: only checks for Git. TBH I don't know exactly what this does but I'm trying to speed up tramp and it's in the faq
   (setq tramp-verbose 1)            ; Reduce logging
 
   (defun ssh ()
     "Open find-file pre-populated with the SSH prefix."
     (interactive)
     (find-file (read-file-name "Remote file: " "/ssh:")))
+
+  (setq magit-tramp-pipe-stty-settings 'pty)
+
+     
+
 )
 
 ;; Let's connect magit to github
