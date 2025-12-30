@@ -14,7 +14,6 @@
 (setq package-install-upgrade-built-in t)
 
 
-
 ;; Tabs are just 4 spaces. I hate tabs!
 (setq indent-tabs-mode nil)
 (setq tab-width 4)
@@ -32,14 +31,16 @@
     ;;let* evaluates sequentially, not parallel so we can use secrets list
     (let* (
 	  (secrets-list (split-string (buffer-string) "\n" t)) ; Get each line. 't' omits empty strings
-	  (matching-secret (seq-filter
+	  (matching-secret (car (seq-filter
 					  (lambda (x)  (equal key (car (split-string x "=" t))))
 					  secrets-list)))
-	  ;; Return here
-	  (cadr (split-string (car matching-secret) "="))
+	  )
+	  ;; Return here, have to use
+          (substring matching-secret (+ 1 (string-match "=" matching-secret)))
     )
   )
 )
+
 
 ;; Use ibuffer instead of standard buffer
 (global-set-key (kbd "C-x C-b") 'ibuffer)
@@ -103,7 +104,13 @@
 ;; Let's connect magit to github
 (use-package forge
   :ensure t
-  :after magit)
+  :after magit
+  :init
+  ;; Annoyingly use something other than my custom secrets for source
+  ;; Have to run git config --global github.user christopherthomas55 first
+  (setq auth-sources (list (file-name-concat user-emacs-directory ".authinfo")))
+
+  )
 
 (use-package org
   :ensure t
@@ -421,30 +428,21 @@
 	;; Default font size bigger
 	(set-face-attribute 'default nil :height 175)
 
-	)
+	;; I am only setting up jira on my work emacs lol
+	;; TODO - integrate with evil mode
+	(use-package jira
+	  :ensure t
+	  :config
+	  (setq jira-base-url "https://simplerpostage.atlassian.net") ;; Jira instance URL
+	  (setq jira-username "cthomas@easypost.com") ;; Jira username (usually, an email)
+	  ;; API token for Jira
+	  ;; See https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/
+	  (setq jira-token (load-secret "JIRA_TOKEN"))
+	  (setq jira-token-is-personal-access-token nil)
+	  (setq jira-api-version 3) ;; Version 2 is also allowed
+	  :init 
+	  (global-set-key (kbd "C-x j") 'jira-issues)
+	  )
+
+  )
 )
-
-
-(custom-set-variables
- '(custom-safe-themes
-   '("75b371fce3c9e6b1482ba10c883e2fb813f2cc1c88be0b8a1099773eb78a7176"
-     "8363207a952efb78e917230f5a4d3326b2916c63237c1f61d7e5fe07def8d378"
-     "51fa6edfd6c8a4defc2681e4c438caf24908854c12ea12a1fbfd4d055a9647a3"
-     "d5fd482fcb0fe42e849caba275a01d4925e422963d1cd165565b31d3f4189c87"
-     "5a0ddbd75929d24f5ef34944d78789c6c3421aa943c15218bac791c199fc897d"
-     default))
- '(org-enforce-todo-dependencies t)
- '(package-selected-packages
-   '(evil-collection evil-org f forge gptel gruvbox-theme magit
-		     org-habit-stats org-roam sqlite3 swiper))
- '(safe-local-variable-values
-   '((vc-default-patch-addressee . "bug-gnu-emacs@gnu.org")
-     (vc-prepare-patches-separately)
-     (etags-regen-ignores "test/manual/etags/")
-     (etags-regen-regexp-alist
-      (("c" "objc") "/[ \11]*DEFVAR_[A-Z_ \11(]+\"\\([^\"]+\\)\"/\\1/"
-       "/[ \11]*DEFVAR_[A-Z_ \11(]+\"[^\"]+\",[ \11]\\([A-Za-z0-9_]+\\)/\\1/"))
-     (diff-add-log-use-relative-names . t)
-     (vc-git-annotate-switches . "-w"))))
-(custom-set-faces
- )
