@@ -387,6 +387,16 @@
   :ensure t
 )
 
+;; Quickscope is fun for moving with fFtT fast in evil mode
+(use-package evil-quickscope
+  :ensure t
+  :init
+  ;; There's an always mode that may be worth hooking to some code
+  ;; (add-hook 'prog-mode-hook 'turn-on-evil-quickscope-always-mode)
+  ;; For now this works
+  (global-evil-quickscope-mode 1)
+)
+
 ;; Dired mode ordering pref
 ;; lah standard,  F shows dir type, v makes dotfiles handling same, reverse makes prettier
 (setq dired-listing-switches "-rlahFv --group-directories-first")
