@@ -107,7 +107,12 @@
   ;; Set up habits
   (add-to-list 'org-modules 'org-habit)
   ;; I like seeing a lot of days
-  (setq org-agenda-span 14)
+  (setq org-agenda-span 20)
+  (setq org-agenda-start-on-weekday nil)
+  (setq  org-agenda-start-day "-5d")
+
+
+
 
   ;; Record the date/time when a task is marked DONE
   (setq org-log-done 'time)
@@ -119,10 +124,11 @@
   (setq org-agenda-start-with-log-mode t)
 
   ;; Habits nicer
-  (setq org-habit-preceding-days 10)
+  (setq org-habit-preceding-days 30)
   (setq org-habit-following-days 2)
-
-
+  (setq org-habit-show-all-today t)
+  (setq org-habit-graph-column 60)
+  (setq org-habit-show-done-always-green t)
   ;; TODO this can theoretically get slow
   ;; The string search avoids emacs swap files that start with .#
   ;; TODO rerun on org agenda load
@@ -362,7 +368,6 @@
      "5a0ddbd75929d24f5ef34944d78789c6c3421aa943c15218bac791c199fc897d"
      default))
  '(org-enforce-todo-dependencies t)
- '(org-habit-graph-column 60)
  '(package-selected-packages
    '(evil-collection evil-org f forge gptel gruvbox-theme magit
 		     org-habit-stats org-roam sqlite3 swiper))
