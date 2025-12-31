@@ -382,11 +382,6 @@
 ;; w3m
 
 
-;; My favorite theme - gruvbox dark
-(use-package gruvbox-theme
-  :ensure t
-)
-
 ;; Quickscope is fun for moving with fFtT fast in evil mode
 (use-package evil-quickscope
   :ensure t
@@ -401,9 +396,6 @@
 ;; lah standard,  F shows dir type, v makes dotfiles handling same, reverse makes prettier
 (setq dired-listing-switches "-rlahFv --group-directories-first")
 
-;; THEME!
-(load-theme 'gruvbox-dark-medium t)
-
 ;; IVY for completion
 ;; TODO - Compile
 ;; Include ivy swiper and counsel for better completion (TODO: 
@@ -415,6 +407,11 @@
   (ivy-mode 1)
   (setq ivy-use-virtual-buffers t)
   (setq ivy-count-format "(%d/%d) ")
+)
+
+;; Racket mode? Why am I learning racket??? Idk lol
+(use-package racket-mode
+  :ensure t
 )
 
 ;;TODO evaluate
@@ -456,3 +453,32 @@
 
   )
 )
+
+;; THEME! I like randomness
+;; Darks
+;; My favorite theme - gruvbox dark
+(use-package gruvbox-theme
+  :ensure t)
+(use-package grayscale-theme
+  :ensure t)
+(use-package zenburn-theme
+  :ensure t)
+
+;; Lights
+
+
+;; Circadian flux like behavior
+(use-package circadian
+  :ensure t
+  :config
+  ;; TODO - variabile this, but I'm running into noob lisp quoting issues
+  ;;(setq cthomas-dark-themes '(grayscale gruvbox-dark-soft modus-vivendi))
+  ;;(setq cthomas-light-themes '(modus-operandi-tinted whiteboard))
+  (setq calendar-latitude 30.26)
+  (setq calendar-longitude -97.7)
+  (setq circadian-themes '(("00:00" . (grayscale gruvbox-dark-soft modus-vivendi zenburn-theme))
+                           ("9:00" . (modus-operandi-tinted whiteboard))
+                           (:sunset . (grayscale gruvbox-dark-soft modus-vivendi zenburn-theme)))
+	)
+  (add-hook 'emacs-startup-hook #'circadian-setup)
+  (circadian-setup))
