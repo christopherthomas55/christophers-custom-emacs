@@ -52,6 +52,8 @@
   (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
   (setq evil-undo-system 'undo-redo)
   (setq evil-want-C-u-scroll t)
+  ;; Use M-u instead for C-u stuff
+  (global-set-key (kbd "M-u") 'universal-argument)
   (setq evil-want-keybinding nil)
   :config
   (evil-mode 1))
@@ -120,7 +122,7 @@
   (if (file-directory-p "~/org/todos") () (make-directory "~/org/todos"))
   ;; Allows us to do advanced TODO tracking
   ;; The @ and ! are just timestamp tracking. We could theoretically log more if you rtfm
-  (setq org-todo-keywords '((sequence "TODO(t!)" "SHELVED(s!)" "IN PROGRESS(p!)" "|" "IDEA(i)" "PROJECT(j)" "DONE(d!)" "WRITING(r)" "CANCELED(c@)")))
+  (setq org-todo-keywords '((sequence "TODO(t!)" "SHELVED(s!)" "IN_PROGRESS(p!)" "|" "IDEA(i)" "PROJECT(j)" "DONE(d!)" "WRITING(r)" "CANCELED(c@)")))
 
   ;; Very similar to suggested templates
   (setq org-capture-templates
@@ -128,20 +130,23 @@
 	   "* TODO %?\n  %i\n  %a")
 	  ("i" "IDEA" entry (file+datetree "~/org/unprocessed_ideas.org")
 	   "* %?\nEntered on %U\n  %i\n  %a")
-	  ("p" "PROJECT" entry (file+datetree "~/org/unprocessed_projects.org")
-	   "* %?\nEntered on %U\n  %i\n  %a")
+	  ("p" "PROJECT" entry (file+headline "~/org/unprocessed_projects.org" "Project ideas")
+	   "* PROJECT %?\n  %i\n  %a")
 	  ("j" "Journal" entry (file+datetree "~/org/writing/journal.org")
 	   "* %?\nEntered on %U\n  %i\n  %a")
-	  ("short" "short" entry (file+datetree "~/org/writing/shorts.org")
+	  ("short" "short" entry (file+headline "~/org/writing/shorts.org")
 	   "* %?\nEntered on %U\n  %i\n  %a")
 	  ))
 
   (setq org-default-notes-file (concat org-directory "/notes.org"))
 
-  ;; TODO - deal with this. Don't think this is needed
+
   (global-set-key (kbd "C-c l") #'org-store-link)
   (global-set-key (kbd "C-c a") #'org-agenda)
   (global-set-key (kbd "C-c c") #'org-capture)
+  ;; Lambda because I was experimenting with new buffers and what not
+  (add-hook 'org-capture-after-finalize-hook (lambda () (org-capture-goto-last-stored)))
+
   ;; Some defined in org-roam too
 
   ;; Set up habits
@@ -164,7 +169,7 @@
   (setq org-agenda-start-with-log-mode t)
 
   ;; Habits nicer
-  (setq org-habit-preceding-days 30)
+  (setq org-habit-preceding-days 20)
   (setq org-habit-following-days 2)
   (setq org-habit-show-all-today t)
   (setq org-habit-graph-column 60)
@@ -183,8 +188,11 @@
 	 ;; Only certain projects for size reasons
 	 (if (file-directory-p "~/projects/")
 	     (directory-files-recursively "~/projects/" "\\.org$")
-	     ()
-	 ))
+	     ())
+	 (if (file-directory-p "~/org/hosted_org_notes/")
+	     (directory-files-recursively "~/org/hosted_org_notes/" "\\.org$")
+	     ())
+	 )
     )
    )
   )
@@ -238,6 +246,22 @@
 	 (propertize "${tags:30}" 'face 'org-tag)
 	 " ${title:*}"
 	 ))
+
+  (setq org-roam-mode-sections
+	(list #'org-roam-backlinks-section
+	      #'org-roam-reflinks-section
+	      ;; Can remove below once speed needed
+	      #'org-roam-unlinked-references-section
+	      ))
+
+  ;; This makes org roam a side window so we c
+  (add-to-list 'display-buffer-alist
+	       '("\\*org-roam\\*"
+		 (display-buffer-in-direction)
+		 (direction . right)
+		 (window-width . 0.33)
+                 (window-height . fit-window-to-buffer)))
+
   
   ;; General template
   (setq org-roam-capture-templates
@@ -261,7 +285,6 @@
 	  ))
 
   ;; GPT recommended n , but I do m for roaM too
-
   (global-set-key (kbd "C-c m f") #'org-roam-node-find)
   (global-set-key (kbd "C-c n f") #'org-roam-node-find)
 
@@ -285,6 +308,7 @@
 
   ;; This is cool. Allows us to complete any [[word-or-none]] with a link
   ;; TODO - Is this just a normal completion???? And should it be completion always?
+  ;; TODO - I never use this
   (global-set-key (kbd "C-c m TAB") #'completion-at-point)
   (global-set-key (kbd "C-c n TAB") #'completion-at-point)
 
@@ -314,6 +338,21 @@
 ;; TODO - this may have  astartup performance cost
 (org-roam-db-autosync-mode)
 (org-roam-db-sync)
+
+;; Webserver ui for this too, over port XXXX
+(use-package websocket
+    :enusre t
+    :after org-roam)
+
+;; Should happen on ports 35901 for html/js, and 35903 for websocket
+(use-package org-roam-ui
+    :ensure t
+    :after org-roam websocket
+    :config
+    (setq org-roam-ui-sync-theme t
+          org-roam-ui-follow t
+          org-roam-ui-update-on-save t
+          org-roam-ui-open-on-start t))
 
 ;; Trying this - TODO verify
 ;(use-package org-habit-stats
@@ -396,33 +435,115 @@
 ;; lah standard,  F shows dir type, v makes dotfiles handling same, reverse makes prettier
 (setq dired-listing-switches "-rlahFv --group-directories-first")
 
-;; IVY for completion
-;; TODO - Compile
+;; Used to do IVY for completion
 ;; Include ivy swiper and counsel for better completion (TODO: 
 ;; (add-to-list 'load-path "~/downloaded_repos/elisp_repos/swiper/")
 ;; (require ')
-(use-package swiper
+;;(use-package swiper
+;;  :ensure t
+;;  :init 
+;;  (ivy-mode 1)
+;;  (setq ivy-use-virtual-buffers t)
+;;  (setq ivy-count-format "(%d/%d) ")
+;;)
+
+;; Enable Vertico.
+(use-package vertico
   :ensure t
-  :init 
-  (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t)
-  (setq ivy-count-format "(%d/%d) ")
+  :custom
+  ;; (vertico-scroll-margin 0) ;; Different scroll margin
+  ;; (vertico-count 20) ;; Show more candidates
+  (vertico-resize t) ;; Grow and shrink the Vertico minibuffer
+  (vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
+  :init
+  (vertico-mode))
+
+;; Save history - in vertico docs
+;; Persist history over Emacs restarts. Vertico sorts by history position.
+(use-package savehist
+  :ensure t
+  :init
+  (savehist-mode 1)
+  (recentf-mode 1))
+
+;; Now do orderless completion
+(use-package orderless
+  :ensure t
+  :init
+  ;;(completion-styles '(orderless basic))
+  (setq completion-ignore-case t)
+  (setq read-file-name-completion-ignore-case t)
+  (setq read-buffer-completion-ignore-case t)
+  (setq completion-styles '(orderless basic)
+      completion-category-defaults nil ; This fixes C-h v and C-h f to use orderless
+      orderless-matching-styles '(orderless-literal orderless-flex))
+
+  ;; 2. CASE INSENSITIVITY
+  (setq completion-ignore-case t
+	read-buffer-completion-ignore-case t
+	read-file-name-completion-ignore-case t
+        completion-category-overrides '((file (styles basic partial-completion)))
+        completion-pcm-leading-wildcard t) ;; Emacs 31: partial-completion behaves like substring
 )
+
+;; Enable rich annotations using the Marginalia package - copy pasted from github
+(use-package marginalia
+  :ensure t
+  ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
+  ;; available in the *Completions* buffer, add it to the
+  ;; `completion-list-mode-map'.
+  :bind (:map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+  ;; The :init section is always executed.
+  :init
+  ;; Marginalia must be activated in the :init section of use-package such that
+  ;; the mode gets enabled right away. Note that this forces loading the
+  ;; package.
+  (marginalia-mode))
+	
+
+;; Prescient for completion ordering. Stolen from https://kristofferbalintona.me/posts/202504050923/
+;; Just using prescient for ordering minibuffer results, TODO - make custom solution based on frequency + recency
+;; I haven't really tested this
+(use-package prescient
+  :custom
+  ;; My settings for relevant user options:
+   (prescient-aggressive-file-save t)
+   (prescient-sort-length-enable nil)
+   (prescient-sort-full-matches-first t)
+   (prescient-history-length 200)
+   (prescient-frequency-decay 0.997)
+   (prescient-frequency-threshold 0.05)
+  :config
+  ;; Optional: persist prescient statistics to an on-disk cache
+  (prescient-persist-mode 1))
+
+;; Also stolen from https://kristofferbalintona.me/posts/202504050923/
+(use-package vertico-prescient
+  :ensure t
+  :demand t
+  :after vertico prescient
+  :custom
+  ;; Sorting.
+  (vertico-prescient-enable-sorting t)
+  (vertico-prescient-override-sorting nil) ; Don't override `display-sort-function'
+
+  ;; Filtering
+  (vertico-prescient-enable-filtering nil) ; We want orderless to do the filtering
+  ;; See also `vertico-prescient-completion-styles',
+  ;; `vertico-prescient-completion-category-overrides', and
+  ;; `prescient--completion-recommended-overrides'.  Those options apply only
+  ;; when when `vertico-prescient-enable-filtering' is non-nil.
+  :config
+  (vertico-prescient-mode 1))
 
 ;; Racket mode? Why am I learning racket??? Idk lol
 (use-package racket-mode
   :ensure t
 )
 
-;;TODO evaluate
-;;(use-package ivy-prescient
-;;  :ensure ()
-;;  :init
-;;)
-
 ;; MY custom things
-;; Right now only wiki
-;; TODO
+;; Right now only some web searches
 (load-file (file-name-concat user-emacs-directory "christophers-custom-emacs" "web-search.el"))
 (require 'web-search)
 
@@ -463,9 +584,8 @@
   :ensure t)
 (use-package zenburn-theme
   :ensure t)
-
-;; Lights
-
+(use-package color-theme-sanityinc-tomorrow
+  :ensure t)
 
 ;; Circadian flux like behavior
 (use-package circadian
@@ -477,7 +597,7 @@
   (setq calendar-latitude 30.26)
   (setq calendar-longitude -97.7)
   (setq circadian-themes '(("00:00" . (grayscale gruvbox-dark-soft modus-vivendi zenburn-theme))
-                           ("9:00" . (modus-operandi-tinted whiteboard))
+                           ("9:00" . (modus-operandi-tinted sanityinc-tomorrow-day whiteboard))
                            (:sunset . (grayscale gruvbox-dark-soft modus-vivendi zenburn-theme)))
 	)
   (add-hook 'emacs-startup-hook #'circadian-setup)
