@@ -12,6 +12,8 @@
 ;; Allow bundled packages to upgrade (used for seq package dependencies in Magit), generally useful even after building from source
 (setq package-install-upgrade-built-in t)
 
+;; 80 MB is much better than default of 800 KB
+(setq gc-cons-threshold 80000000)
 
 ;; Tabs are just 4 spaces. I hate tabs!
 (setq indent-tabs-mode nil)
@@ -68,11 +70,21 @@
 ;; More in depth customizations. Notice this is after evil installed
 (load-file "~/.emacs.d/christophers-custom-emacs/org.el")
 (load-file "~/.emacs.d/christophers-custom-emacs/lsp.el")
+(load-file "~/.emacs.d/christophers-custom-emacs/themes.el")
 
 
 ;; Magit git
 (use-package magit
   :ensure t)
+(use-package diff-hl
+  :ensure t
+  :init
+  (global-diff-hl-mode)
+  (diff-hl-flydiff-mode)
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+  (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
+
+)
 
 (use-package tramp
   :ensure t
@@ -335,30 +347,4 @@
   )
 )
 
-;; THEME! I like randomness
-;; Darks
-;; My favorite theme - gruvbox dark
-(use-package gruvbox-theme
-  :ensure t)
-(use-package grayscale-theme
-  :ensure t)
-(use-package zenburn-theme
-  :ensure t)
-(use-package color-theme-sanityinc-tomorrow
-  :ensure t)
 
-;; Circadian flux like behavior
-(use-package circadian
-  :ensure t
-  :config
-  ;; TODO - variabile this, but I'm running into noob lisp quoting issues
-  ;;(setq cthomas-dark-themes '(grayscale gruvbox-dark-soft modus-vivendi))
-  ;;(setq cthomas-light-themes '(modus-operandi-tinted whiteboard))
-  (setq calendar-latitude 30.26)
-  (setq calendar-longitude -97.7)
-  (setq circadian-themes '(("00:00" . (grayscale gruvbox-dark-soft modus-vivendi zenburn-theme))
-                           ("9:00" . (modus-operandi-tinted sanityinc-tomorrow-day whiteboard))
-                           (:sunset . (grayscale gruvbox-dark-soft modus-vivendi zenburn-theme)))
-	)
-  (add-hook 'emacs-startup-hook #'circadian-setup)
-  (circadian-setup))
