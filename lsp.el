@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; To do dev on local EP mac, need to get shell variables right
 (use-package exec-path-from-shell
   :ensure t
@@ -55,8 +56,20 @@
     (which-key-mode))
 
 
+;; Rust dev env
+(use-package rustic
+  :ensure t
+  :config
+  (setq rustic-format-on-save nil)
+  :custom
+  (rustic-cargo-use-last-stored-arguments t))
 
-;; PYTHON DEV ENV(use-package pet
+;; Racket mode? Why am I learning racket??? Idk lol
+(use-package racket-mode
+  :ensure t
+)
+
+;; PYTHON DEV ENV
 ;; Pet finds virtual envs (very useful at EP)
 (use-package pet
   :ensure t
@@ -70,14 +83,17 @@
 (use-package f
   :ensure t)
 
-(use-package copilot
-  :ensure t
-  :vc (:url "https://github.com/copilot-emacs/copilot.el"
-	    :rev :newest
-	    :branch "main")
-  :init
-  (add-hook 'prog-mode-hook 'copilot-mode)
-  :bind (:map copilot-mode-map
-              ("<tab>" . copilot-accept-completion)
-              ("TAB" . copilot-accept-completion))
+;; Copilot
+;; only on workmac for now
+(when (eq system-type 'darwin)
+  (use-package copilot
+    :ensure t
+    :vc (:url "https://github.com/copilot-emacs/copilot.el"
+	      :rev :newest
+	      :branch "main")
+    :init
+    (add-hook 'prog-mode-hook 'copilot-mode)
+    :bind (:map copilot-mode-map
+		("<tab>" . copilot-accept-completion)
+		("TAB" . copilot-accept-completion)))
   )

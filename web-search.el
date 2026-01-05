@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (defun smart-rename (basename)
   "Renames generated buffer depending on basename arg given, but doesn't move buffer"
   (let* (

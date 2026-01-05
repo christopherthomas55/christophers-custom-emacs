@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; THEME! I like randomness
 ;; Darks
 ;; My favorite theme - gruvbox dark

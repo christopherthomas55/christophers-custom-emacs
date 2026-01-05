@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; Contains my org settings
 (use-package org
   :ensure t

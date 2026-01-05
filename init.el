@@ -1,10 +1,21 @@
+;; -*- lexical-binding: t; -*-
 ;; Set up package.el to work with MELPA
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize)(package-refresh-contents)
+(package-refresh-contents)
+(package-initialize)
 
 ;; Helpful package management
 (require 'use-package)
+
+(setopt server-use-tcp nil)
+;; Failed attempt to se tcp socket so I can use gui emacs over lan if desired
+;;(setopt server-use-tcp t)
+;;(setq server-port 20263)
+;; Could listen on any connected machine, not just 127.0.0.1, but currently ssh forwarding
+;;(setq server-host "0.0.0.0")
+;;(setq server-host "127.0.0.1")
+(server-start)
 
 ;; In emacs < 29 this helps with annoying key issues
 ;;(require 'gnu-elpa-keyring-update)
@@ -71,6 +82,7 @@
 (load-file "~/.emacs.d/christophers-custom-emacs/org.el")
 (load-file "~/.emacs.d/christophers-custom-emacs/lsp.el")
 (load-file "~/.emacs.d/christophers-custom-emacs/themes.el")
+(load-file "~/.emacs.d/christophers-custom-emacs/writing.el")
 
 
 ;; Magit git
@@ -83,7 +95,6 @@
   (diff-hl-flydiff-mode)
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
   (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
-
 )
 
 (use-package tramp
@@ -183,12 +194,36 @@
 
 (use-package dired-subtree
         :ensure t
-        :bind (:map dired-mode-map
-                    ("<tab>" . dired-subtree-toggle))
+	:after (dired evil)
+	;; Was doing this but evil mode is weird
+        ;;:bind (:map dired-mode-map
+        ;;            ("<tab>" . dired-subtree-toggle)
+        ;;            ("TAB" . dired-subtree-toggle))
+	:init
+	(evil-define-key 'normal dired-mode-map (kbd "TAB") 'dired-subtree-toggle)
+	(evil-define-key 'normal dired-mode-map (kbd "<tab>") 'dired-subtree-toggle)
 	)
 		    
 
-;; TODO copilot
+;; Activities to save
+(use-package activities
+  :ensure t
+  :init
+  (activities-mode)
+  (activities-tabs-mode)
+  ;; Prevent `edebug' default bindings from interfering.
+  (setq edebug-inhibit-emacs-lisp-mode-bindings t)
+
+  :bind
+  (("C-x C-a C-n" . activities-new)
+   ("C-x C-a C-d" . activities-define)
+   ("C-x C-a C-a" . activities-resume)
+   ("C-x C-a C-s" . activities-suspend)
+   ("C-x C-a C-k" . activities-kill)
+   ("C-x C-a RET" . activities-switch)
+   ("C-x C-a b" . activities-switch-buffer)
+   ("C-x C-a g" . activities-revert)
+   ("C-x C-a l" . activities-list)))
 
 ;; w3m
 
@@ -308,11 +343,6 @@
   ;; when when `vertico-prescient-enable-filtering' is non-nil.
   :config
   (vertico-prescient-mode 1))
-
-;; Racket mode? Why am I learning racket??? Idk lol
-(use-package racket-mode
-  :ensure t
-)
 
 ;; MY custom things
 ;; Right now only some web searches
