@@ -8,6 +8,8 @@
 ;; Helpful package management
 (require 'use-package)
 
+(setq custom-safe-themes t) ;; TODO - Load my lovely themes. Maybe this is risky?
+
 (setopt server-use-tcp nil)
 ;; Failed attempt to se tcp socket so I can use gui emacs over lan if desired
 ;;(setopt server-use-tcp t)
