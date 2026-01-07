@@ -27,6 +27,7 @@
   (setq calendar-longitude -97.7)
   (defvar my-dark-themes '(grayscale gruvbox-dark-soft modus-vivendi zenburn-theme nord-theme ample-flat))
   (defvar my-light-themes '(modus-operandi-tinted sanityinc-tomorrow-day whiteboard solarized-light ample-light))
+  (setq custom-safe-themes t) ;; TODO - maybe this is risky?
   ;; Grayscale is least red when late
   (setq circadian-themes `(("23:00" . (grayscale))
 			   ("6:00" . ,my-dark-themes)
