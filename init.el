@@ -64,6 +64,7 @@
   (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
   (setq evil-undo-system 'undo-redo)
   (setq evil-want-C-u-scroll t)
+  (setq evil-symbol-word-search t) ;; Helps search for full words in python like example_compound_word
   ;; Use M-u instead for C-u stuff
   (global-set-key (kbd "M-u") 'universal-argument)
   (setq evil-want-keybinding nil)
