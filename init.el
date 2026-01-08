@@ -71,7 +71,10 @@
   (global-set-key (kbd "M-u") 'universal-argument)
   (setq evil-want-keybinding nil)
   :config
-  (evil-mode 1))
+  (evil-mode 1)
+  )
+;; Lazy, but has to happen after evil loaded
+(define-key evil-insert-state-map (kbd "C-n") 'hippie-expand)
 
 ;; Evil keybindings in many modes
 (use-package evil-collection
@@ -157,7 +160,7 @@
   (setq gptel-model 'gemini-3-flash-preview)
   (setq gptel-default-mode 'org-mode)
 
-  (defun gptel-new-session ()
+  (defun my/gptel-new-session ()
     "Create a new gptel chat buffer without prompting."
     (interactive)
     (let* (
@@ -171,9 +174,40 @@
       (pop-to-buffer buf))
   )
 
+  ;; Mostly AI generated, this saves all gpts to myh emacs.d dir
+  (defun my/gptel-save-to-org-file (&rest _args)
+    "Automatically name and save gptel buffers to a specific directory."
+    ;; Optionally could yes/no with (when (y-or-n-p "Save this chat to a file? ")
+    (let* ((dir-base (expand-file-name "~/.emacs.d/gpt_convos/"))
+           (year-month (format-time-string "%Y/%m"))
+           (dir (expand-file-name year-month dir-base))
+           (date-time (format-time-string "%Y%m%d_%H%M%S"))
+	   )
+      ;; Create directory if it doesn't exist
+      (unless (file-directory-p dir)
+	(make-directory dir t))
+      ;; Only name the file if it hasn't been saved yet
+      (unless (buffer-file-name)
+	(let* (
+	       ;; Get first 20 words, remove non-alphanumeric chars for filename safety
+	       (content (save-excursion
+			  (goto-char (point-min))
+			  (buffer-substring-no-properties (point-min) (line-end-position))))
+	       (slug (let* ((alphanum (replace-regexp-in-string "[^[:alnum:] ]" "" content))
+			    (first-20 (substring alphanum 0 (min (length alphanum) 20))))
+		       (string-join (split-string first-20) "_")))
+	  (filename (expand-file-name (format "gpt-%s-%s.org" date-time slug) dir)))
+        (set-visited-file-name filename)
+	(org-mode)
+	(gptel-mode 1))) ; Ensure it's in org-mode for later loading
+    ;; Save the buffer
+    (save-buffer)))
+
+  (add-hook 'gptel-post-response-functions #'my/gptel-save-to-org-file)
+
 
   ;; For now C-c g is gpt start
-  (global-set-key (kbd "C-c g") 'gptel-new-session)
+  (global-set-key (kbd "C-c g") 'my/gptel-new-session)
 )
 
 ;; Dired in sidebar and toggle open dir with tab
