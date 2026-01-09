@@ -165,7 +165,7 @@
       ;; We pass the inverse of the prefix argument logic
       (org-roam-node-visit node (not arg))))
 
-  (define-key org-roam-mode-map (kbd "RET") #'my/org-roam-node-visit-swapped))
+  (define-key org-roam-mode-map (kbd "RET") #'my/org-roam-node-visit-swapped)
 
   
   ;; General template
