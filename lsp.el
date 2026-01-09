@@ -9,20 +9,52 @@
      '("CLAUDE_CODE_USE_VERTEX" "ANTHROPIC_VERTEX_PROJECT_ID" "GOOGLE_CLOUD_PROJECT" "CLOUD_ML_REGION"))
     (exec-path-from-shell-initialize)))
 
-(use-package lsp-mode
-  :ensure t
-  :init
-  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
-  (setq lsp-keymap-prefix "C-l")
-  :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-         (python-mode . lsp)
-         ;; if you want which-key integration
-         (lsp-mode . lsp-enable-which-key-integration))
-  :commands (lsp lsp-deferred))
+;; Treesitter isn't lsp but helps some coding tools
+(use-package treesit-auto
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
 
-(use-package lsp-ui
+(setq major-mode-remap-alist
+      '((python-mode . python-ts-mode)))
+
+(use-package treesit-fold
   :ensure t
-  :commands lsp-ui-mode)
+  :hook (prog-mode . treesit-fold-mode)
+  :config
+  (evil-define-key 'normal treesit-fold-mode-map
+    (kbd "za") 'treesit-fold-toggle
+    (kbd "zc") 'treesit-fold-close
+    (kbd "zo") 'treesit-fold-open
+    (kbd "zm") 'treesit-fold-close-all
+    (kbd "zr") 'treesit-fold-open-all))
+  
+(use-package eglot
+  :ensure t
+  :hook ((rustic-mode . eglot-ensure)
+         (python-mode . eglot-ensure)
+         (python-ts-mode . eglot-ensure)
+         (racket-mode . eglot-ensure))
+  :config
+  (add-to-list 'eglot-server-programs '(rustic-mode . ("rust-analyzer")))
+  (add-to-list 'eglot-server-programs '((python-mode python-ts-mode) . ("basedpyright-langserver" "--stdio")))
+  (add-to-list 'eglot-server-programs '(racket-mode . ("racket-langserver")))
+
+  ;; Keybindings for eglot
+  ;; Note gd - go to definition is global already and very useful
+  ;; C-o to go back from that (C-i is forward too) is also global
+  (evil-define-key 'normal eglot-mode-map
+	(kbd "gr") 'xref-find-references
+	(kbd "gR") 'eglot-rename
+	(kbd "ga") 'eglot-code-actions)
+
+  ;; Warnings on right side of window
+  (setq flymake-show-diagnostics-at-end-of-line t)
+  )
+
+  
 
 ;; TODO look at these
 (use-package dap-mode
@@ -64,6 +96,8 @@
   :ensure t
   :config
   (setq rustic-format-on-save nil)
+  (setq rustic-lsp-client 'eglot)
+  (setq rustic-lsp-server 'rust-analyzer)
   :custom
   (rustic-cargo-use-last-stored-arguments t))
 
@@ -79,7 +113,6 @@
   :config
   (add-hook 'python-base-mode-hook 'pet-mode -10))
 
-
 ;; COPILOT
 (use-package editorconfig
   :ensure t)
@@ -88,6 +121,11 @@
 
 ;; only on workmac for now
 (when (eq system-type 'darwin)
+  (defun my/tab-override-function ()
+    (interactive)
+    (if (copilot--overlay-visible)
+	(copilot-accept-completion)
+      (indent-for-tab-command)))
   ;; Copilot
   (use-package copilot
     :ensure t
@@ -97,8 +135,9 @@
     :init
     (add-hook 'prog-mode-hook 'copilot-mode)
     :bind (:map copilot-mode-map
-		("<tab>" . copilot-accept-completion)
-		("TAB" . copilot-accept-completion)))
+		("<tab>" . my/tab-override-function)
+		("TAB" . my/tab-override-function)))
+  
 
 
   ;; Claude
