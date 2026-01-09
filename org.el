@@ -144,16 +144,28 @@
 	(list #'org-roam-backlinks-section
 	      #'org-roam-reflinks-section
 	      ;; Can remove below once speed needed
+	      ;; TODO - I don't think it works anyways
 	      #'org-roam-unlinked-references-section
 	      ))
 
-  ;; This makes org roam a side window so we c
+  ;; This makes org roam a side window
   (add-to-list 'display-buffer-alist
 	       '("\\*org-roam\\*"
 		 (display-buffer-in-direction)
 		 (direction . right)
 		 (window-width . 0.33)
                  (window-height . fit-window-to-buffer)))
+
+  (defun my/org-roam-node-visit-swapped (node &optional arg)
+    "Visit NODE. With no prefix, opens in main window. With prefix, opens in current.
+     This swaps the default behavior"
+    (interactive (list (org-roam-node-at-point) current-prefix-arg))
+    (when node
+	;; The second argument to org-roam-node-visit is 'other-window'
+      ;; We pass the inverse of the prefix argument logic
+      (org-roam-node-visit node (not arg))))
+
+  (define-key org-roam-mode-map (kbd "RET") #'my/org-roam-node-visit-swapped))
 
   
   ;; General template
