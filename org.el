@@ -129,6 +129,7 @@
   :config
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys)
+  (define-key org-roam-mode-map (kbd "RET") #'my/org-roam-node-visit-swapped)
   :init
   (if (file-directory-p "~/org/roam") () (make-directory "~/org/roam"))
   (setq org-roam-directory (file-truename "~/org/"))
@@ -164,9 +165,6 @@
 	;; The second argument to org-roam-node-visit is 'other-window'
       ;; We pass the inverse of the prefix argument logic
       (org-roam-node-visit node (not arg))))
-
-  (define-key org-roam-mode-map (kbd "RET") #'my/org-roam-node-visit-swapped)
-
   
   ;; General template
   (setq org-roam-capture-templates

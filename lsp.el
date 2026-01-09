@@ -11,6 +11,7 @@
 
 ;; Treesitter isn't lsp but helps some coding tools
 (use-package treesit-auto
+  :ensure t
   :custom
   (treesit-auto-install 'prompt)
   :config
@@ -57,9 +58,9 @@
   
 
 ;; TODO look at these
-(use-package dap-mode
-  :ensure t
-  )
+;(use-package dap-mode
+; :ensure t
+; )
 ;(use-package dap-python
 ;  :ensure t
 ;  )
