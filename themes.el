@@ -12,9 +12,6 @@
   :ensure t)
 (use-package nord-theme
   :ensure t)
-(use-package ample-theme
-  :ensure t
-)
 
 ;; Circadian flux like behavior
 (use-package circadian
@@ -26,7 +23,7 @@
   (setq calendar-latitude 30.26)
   (setq calendar-longitude -97.7)
   (defvar my-dark-themes '(grayscale gruvbox-dark-soft modus-vivendi zenburn nord ample-flat))
-  (defvar my-light-themes '(modus-operandi-tinted sanityinc-tomorrow-day whiteboard solarized-light ample-light))
+  (defvar my-light-themes '(modus-operandi-tinted sanityinc-tomorrow-day whiteboard solarized-light))
   ;; Grayscale is least red when late
   (setq circadian-themes `(("23:00" . grayscale)
 			   ("6:00" . ,my-dark-themes)

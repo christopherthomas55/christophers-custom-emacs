@@ -1,13 +1,15 @@
 ;; -*- lexical-binding: t; -*-
 ;; To do dev on local EP mac, need to get shell variables right
+;; In general shell variables are a bit weird, may need to do something
 (use-package exec-path-from-shell
   :ensure t
   :init
   (when (memq window-system '(mac ns x))
     ;; These are for claude code.
     (exec-path-from-shell-copy-envs
-     '("CLAUDE_CODE_USE_VERTEX" "ANTHROPIC_VERTEX_PROJECT_ID" "GOOGLE_CLOUD_PROJECT" "CLOUD_ML_REGION"))
-    (exec-path-from-shell-initialize)))
+     '("CAUDE_CODE_USE_VERTEX" "ANTHROPIC_VERTEX_PROJECT_ID" "GOOGLE_CLOUD_PROJECT" "CLOUD_ML_REGION"))
+    )
+  (exec-path-from-shell-initialize))
 
 ;; Treesitter isn't lsp but helps some coding tools
 (use-package treesit-auto
@@ -37,11 +39,25 @@
   :hook ((rustic-mode . eglot-ensure)
          (python-mode . eglot-ensure)
          (python-ts-mode . eglot-ensure)
-         (racket-mode . eglot-ensure))
+         (racket-mode . eglot-ensure)
+	 ;; Tons of js and typescript bs
+         (js-mode . eglot-ensure)
+         (js-ts-mode . eglot-ensure)
+         (typescript-mode . eglot-ensure)
+         (typescript-ts-mode . eglot-ensure)
+         (tsx-ts-mode . eglot-ensure))
   :config
   (add-to-list 'eglot-server-programs '(rustic-mode . ("rust-analyzer")))
   (add-to-list 'eglot-server-programs '((python-mode python-ts-mode) . ("basedpyright-langserver" "--stdio")))
   (add-to-list 'eglot-server-programs '(racket-mode . ("racket-langserver")))
+  (add-to-list 'eglot-server-programs
+               '((js-mode js-ts-mode typescript-mode typescript-ts-mode tsx-ts-mode)
+                 . ("vtsls" "--stdio")))
+  ;;LLM says this is necesary for vtsls to work but I don't know
+  ;; (setq eglot-workspace-configuration
+  ;; 	'((:vtsls . ((typescript . ((updateImportsOnFileMove . ((enabled . "always")))))
+  ;; 		     (javascript . ((updateImportsOnFileMove . ((enabled . "always"))))))
+  ;; 		  )))
 
   ;; Keybindings for eglot
   ;; Note gd - go to definition is global already and very useful
@@ -113,6 +129,9 @@
   :ensure t
   :config
   (add-hook 'python-base-mode-hook 'pet-mode -10))
+
+;; Typescript/js lasp is vtlsp
+;;
 
 ;; COPILOT
 (use-package editorconfig
