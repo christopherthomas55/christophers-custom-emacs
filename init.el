@@ -91,18 +91,6 @@
 (load-file "~/.emacs.d/christophers-custom-emacs/writing.el")
 
 
-;; Magit git
-(use-package magit
-  :ensure t)
-(use-package diff-hl
-  :ensure t
-  :init
-  (global-diff-hl-mode)
-  (diff-hl-flydiff-mode)
-  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
-  (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
-)
-
 (use-package tramp
   :ensure t
   :config
@@ -136,18 +124,6 @@
      
 
 )
-
-;; Let's connect magit to github
-(use-package forge
-  :ensure t
-  :after magit
-  :init
-  ;; Annoyingly use something other than my custom secrets for source
-  ;; Have to run git config --global github.user christopherthomas55 first
-  (setq auth-sources (list (file-name-concat user-emacs-directory ".authinfo")))
-
-  )
-
 
 ;; LLM chat interface
 (use-package gptel

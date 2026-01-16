@@ -11,6 +11,11 @@
     )
   (exec-path-from-shell-initialize))
 
+;; Some QOL settings for programming modes
+;; Show line numbers
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(add-hook 'prog-mode-hook 'column-number-mode)
+
 ;; Treesitter isn't lsp but helps some coding tools
 (use-package treesit-auto
   :ensure t
@@ -189,3 +194,44 @@
     (:repeat-map my-claude-code-map ("M" . claude-code-cycle-mode)))
 
   )
+
+;; Magit and code review tools
+(use-package magit
+  :ensure t)
+(use-package diff-hl
+  :ensure t
+  :init
+  (global-diff-hl-mode)
+  (diff-hl-flydiff-mode)
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+  (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
+)
+
+;; Let's connect magit to github
+(use-package forge
+  :ensure t
+  :after magit
+  :init
+  ;; Annoyingly use something other than my custom secrets for source
+  ;; Have to run git config --global github.user christopherthomas55 first
+  (setq auth-sources (list (file-name-concat user-emacs-directory ".authinfo")))
+
+  )
+
+
+;; (use-package emojify
+;;   :ensure t
+;;   :config
+;;   (emojify-set-emoji-styles '(github))
+;;   )
+;; 
+;; ;; Enable github code review
+;; ;; This is a potential project to fix these
+;; (use-package code-review
+;;   :ensure t
+;;   :after forge
+;;   :bind (:map forge-topic-mode-map
+;;               ("r" . code-review-forge-pr-at-point))
+;;   :config
+;;   (add-hook 'code-review-mode-hook #'emojify-mode)
+;;   )
