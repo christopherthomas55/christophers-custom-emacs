@@ -22,12 +22,23 @@
   ;;(setq cthomas-light-themes '(modus-operandi-tinted whiteboard))
   (setq calendar-latitude 30.26)
   (setq calendar-longitude -97.7)
-  (defvar my-dark-themes '(grayscale gruvbox-dark-soft modus-vivendi zenburn nord ample-flat))
-  (defvar my-light-themes '(modus-operandi-tinted sanityinc-tomorrow-day whiteboard solarized-light))
-  ;; Grayscale is least red when late
-  (setq circadian-themes `(("23:00" . grayscale)
-			   ("6:00" . ,my-dark-themes)
-                           ("9:00" . ,my-light-themes)
-                           (:sunset . ,my-dark-themes)))
+  (defvar my-dark-themes '(grayscale gruvbox-dark-medium modus-vivendi zenburn nord))
+  (defvar my-light-themes '(modus-operandi-tinted))
+  ;; Change every 2 hours
+  (setq circadian-themes `(("6:00" . ,my-dark-themes)
+			   ("8:00" . ,my-dark-themes)
+			   ("10:00" . ,my-dark-themes)
+			   ("12:00" . ,my-dark-themes)
+			   ("14:00" . ,my-dark-themes)
+			   ("16:00" . ,my-dark-themes)
+			   ("18:00" . ,my-dark-themes)
+			   ("21:00" . grayscale)))
   (add-hook 'emacs-startup-hook #'circadian-setup)
   (circadian-setup))
+
+;; I'm a cmd line hacker - get these out of here!
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+
+(setq default-frame-alist '((undecorated . t)))

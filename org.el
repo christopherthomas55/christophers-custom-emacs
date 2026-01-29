@@ -5,14 +5,18 @@
   :after evil-org
   :config
   (if (file-directory-p "~/org/") () (make-directory "~/org"))
-  (if (file-directory-p "~/org/todos") () (make-directory "~/org/todos"))
   ;; Allows us to do advanced TODO tracking
   ;; The @ and ! are just timestamp tracking. We could theoretically log more if you rtfm
-  (setq org-todo-keywords '((sequence "TODO(t!)" "SHELVED(s!)" "IN_PROGRESS(p!)" "|" "IDEA(i)" "PROJECT(j)" "DONE(d!)" "WRITING(r)" "CANCELED(c@)")))
+  (setq org-todo-keywords '((sequence "TODO(t!)" "LINUX (l)" "CODING(c)" "READING(r)" "WRITING(w)" "BRAINSTORM(b)" "|" "DONE(d!)")))
 
+  (setq org-default-notes-file (concat org-directory "/notes.org"))
+  (setq my/todo-file "~/org/hosted_org_notes/todos.org")
+
+  ;; TODO - short not working, rename to writing snippet
+  ;; TODO - I really customized up my setup after a month using org
   ;; Very similar to suggested templates
   (setq org-capture-templates
-	'(("t" "TODO" entry (file+headline "~/org/todos/unprocessed_todos.org" "Tasks")
+	'(("t" "TODO" entry (file+headline my/todo-file "Tasks")
 	   "* TODO %?\n  %i\n  %a")
 	  ("i" "IDEA" entry (file+datetree "~/org/unprocessed_ideas.org")
 	   "* %?\nEntered on %U\n  %i\n  %a")
@@ -20,22 +24,22 @@
 	   "* PROJECT %?\n  %i\n  %a")
 	  ("j" "Journal" entry (file+datetree "~/org/writing/journal.org")
 	   "* %?\nEntered on %U\n  %i\n  %a")
-	  ("short" "short" entry (file+headline "~/org/writing/shorts.org")
-	   "* %?\nEntered on %U\n  %i\n  %a")
 	  ))
-
-  (setq org-default-notes-file (concat org-directory "/notes.org"))
-
 
   (global-set-key (kbd "C-c l") #'org-store-link)
   (global-set-key (kbd "C-c a") #'org-agenda)
   (global-set-key (kbd "C-c c") #'org-capture)
   ;; Lambda because I was experimenting with new buffers and what not
   (add-hook 'org-capture-after-finalize-hook (lambda () (org-capture-goto-last-stored)))
-  ;; Some defined in org-roam too
 
+  ;; Whow my working ons
+  (setq org-agenda-custom-commands
+	'(("w" "Work Overview"
+	   tags-tree "working_on"
+	   ((org-show-context-detail '((default . tree)))))))
 
   ;; Only difference compared to default is we find-file, not in other window or fram
+  ;; I don't remember the details
   (setq org-link-frame-setup
 	'((vm . vm-visit-folder-other-frame)
 	 (vm-imap . vm-visit-imap-folder-other-frame)
@@ -44,10 +48,19 @@
 
   ;; Set up habits
   (add-to-list 'org-modules 'org-habit)
-  ;; I like seeing a lot of days
-  (setq org-agenda-span 20)
+  ;; I don't really use this as a hardcore time tracker
+  (setq org-agenda-span 1)
   (setq org-agenda-start-on-weekday nil)
-  (setq  org-agenda-start-day "-5d")
+  (setq  org-agenda-start-day "-0d")
+  ;; I don't have many deadlines so I like seeing them
+  (setq org-deadline-warning-days 180)
+
+  ;; I just edited org agenda
+  (setq  org-agenda-sorting-strategy
+	 '((agenda habit-up tag-up deadline-up alpha-up)
+	   (todo urgency-down category-keep)
+	   (tags urgency-down category-keep)
+	   (search category-keep)))
 
 
 
@@ -65,33 +78,47 @@
   (setq org-habit-preceding-days 20)
   (setq org-habit-following-days 2)
   (setq org-habit-show-all-today t)
-  (setq org-habit-graph-column 60)
+  (setq org-habit-graph-column 65)
   (setq org-habit-show-done-always-green t)
+
+  (defun my/org-agenda-auto-refresh ()
+    "Refresh the agenda view if it is currently displayed."
+    (let ((buffer (get-buffer "*Org Agenda*")))
+      (when buffer
+	(with-current-buffer buffer
+	  (org-agenda-redo-all)))))
+  ;; Maybe try this? Idk
+  ;;(add-hook 'org-after-todo-state-change-hook 'my/org-agenda-auto-refresh)
+
   ;; TODO this can theoretically get slow
   ;; The string search avoids emacs swap files that start with .#
   ;; TODO rerun on org agenda load
-  (defun reload-org-agenda-files ()
+  (defun my/reload-org-agenda-files ()
    (interactive)
    (setq org-agenda-files
     (seq-filter (lambda (x) (not (string-search "/.#" x)))
 	(append
-	 ;; Have agen
-	 (directory-files-recursively "~/org/todos/" "\\.org$")
-	 ;; TODO target certain files here
-	 ;; Only certain projects for size reasons
+	 (list "~/org/habits.org"
+	       "~/org/writing/working_on.org"
+	       "~/org/computing/working_on.org"
+	       my/todo-file
+	  )
+
+	 ;; Any todos in projects are saved too
+	 (if (file-directory-p "~/org/")
+	     (directory-files-recursively "~/org/" "\\todos.org$")
+	     ())
+	 (if (file-directory-p "~/org/")
+	     (directory-files-recursively "~/org/" "\\todo.org$")
+	     ())
+	 ;; Any todos in projects are saved too
 	 (if (file-directory-p "~/projects/")
 	     (directory-files-recursively "~/projects/" "\\.org$")
 	     ())
-	 (if (file-directory-p "~/org/hosted_org_notes/")
-	     (directory-files-recursively "~/org/hosted_org_notes/" "\\.org$")
-	     ())
-	 )
-    )
-   )
-  )
-  (org-mode-restart)
-  (reload-org-agenda-files))
+	 ))))
 
+  (my/reload-org-agenda-files)
+  (org-mode-restart))
 
 ;; EVILLLLLL in org
 (use-package evil-org
@@ -221,20 +248,7 @@
 
   ;;(global-set-key (kbd "C-c m g") #'org-roam-graph)
   ;;(global-set-key (kbd "C-c n g") #'org-roam-graph)
- 
 
-  ;;(setq org-capture-templates
-  ;;	'(("t" "TODO" entry (file+headline "~/org/todos/unprocessed_todos.org" "Tasks")
-  ;;	   "* TODO %?\n  %i\n  %a")
-  ;;	  ("i" "IDEA" entry (file+datetree "~/org/unprocessed_ideas.org")
-  ;;	   "* %?\nEntered on %U\n  %i\n  %a")
-  ;;	  ("p" "PROJECT" entry (file+datetree "~/org/unprocessed_projects.org")
-  ;;	   "* %?\nEntered on %U\n  %i\n  %a")
-  ;;	  ("j" "Journal" entry (file+datetree "~/writing/journal.org")
-  ;;	   "* %?\nEntered on %U\n  %i\n  %a")
-  ;;	  ("short" "short" entry (file+datetree "~/writing/shorts.org")
-  ;;	   "* %?\nEntered on %U\n  %i\n  %a")
-  ;;	  ))
 )
 
 ;; Load org-roam db after startup

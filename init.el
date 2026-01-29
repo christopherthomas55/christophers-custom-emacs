@@ -1,4 +1,12 @@
 ;; -*- lexical-binding: t; -*-
+
+;; Before anything, setting the face in here prevents flashes of
+;; color as the theme gets activated. Thanks internet!
+(setq default-frame-alist '(
+                            (background-color . "#000000")
+                            (ns-appearance . dark)
+                            (ns-transparent-titlebar . t)))
+
 ;; Set up package.el to work with MELPA
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
@@ -8,7 +16,12 @@
 ;; Helpful package management
 (require 'use-package)
 
+
+;; TODO This will need to get revamped eventually
+(setq my/data-drive "~/ubuntu-home")
 (setq custom-safe-themes t) ;; TODO - Load my lovely themes. Maybe this is risky?
+
+(setq backup-directory-alist '(("." . "~/.emacs.d/file-backups")))
 
 (setopt server-use-tcp nil)
 ;; Failed attempt to se tcp socket so I can use gui emacs over lan if desired
@@ -33,7 +46,8 @@
 (setq tab-width 4)
 
 ;; Line wrapping is a must
-(add-hook 'text-mode-hook 'visual-line-mode) 
+;;(add-hook 'text-mode-hook 'visual-line-mode) 
+(global-visual-line-mode t)
 
 
 ;; Helper fn to load secrets from secret files
@@ -69,6 +83,9 @@
   (setq evil-symbol-word-search t) ;; Helps search for full words in python like example_compound_word
   ;; Use M-u instead for C-u stuff
   (global-set-key (kbd "M-u") 'universal-argument)
+
+  (setq evil-respect-visual-line-mode t)
+
   (setq evil-want-keybinding nil)
   :config
   (evil-mode 1)
@@ -217,30 +234,6 @@
 	(evil-define-key 'normal dired-mode-map (kbd "<tab>") 'dired-subtree-toggle)
 	)
 		    
-
-;; Activities to save
-(use-package activities
-  :ensure t
-  :init
-  (activities-mode)
-  (activities-tabs-mode)
-  ;; Prevent `edebug' default bindings from interfering.
-  (setq edebug-inhibit-emacs-lisp-mode-bindings t)
-
-  :bind
-  (("C-x C-a C-n" . activities-new)
-   ("C-x C-a C-d" . activities-define)
-   ("C-x C-a C-a" . activities-resume)
-   ("C-x C-a C-s" . activities-suspend)
-   ("C-x C-a C-k" . activities-kill)
-   ("C-x C-a RET" . activities-switch)
-   ("C-x C-a b" . activities-switch-buffer)
-   ("C-x C-a g" . activities-revert)
-   ("C-x C-a l" . activities-list)))
-
-;; w3m
-
-
 ;; Quickscope is fun for moving with fFtT fast in evil mode
 (use-package evil-quickscope
   :ensure t

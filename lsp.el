@@ -45,6 +45,8 @@
          (python-mode . eglot-ensure)
          (python-ts-mode . eglot-ensure)
          (racket-mode . eglot-ensure)
+	 (go-mode . eglot-ensure)
+	 (go-ts-mode . eglot-ensure)
 	 ;; Tons of js and typescript bs
          (js-mode . eglot-ensure)
          (js-ts-mode . eglot-ensure)
@@ -135,7 +137,13 @@
   :config
   (add-hook 'python-base-mode-hook 'pet-mode -10))
 
-;; Typescript/js lasp is vtlsp
+;; Go mode
+(use-package go-mode
+  :ensure t
+)
+
+
+;; Typescript/js lsp is vtlsp
 ;;
 
 ;; COPILOT
