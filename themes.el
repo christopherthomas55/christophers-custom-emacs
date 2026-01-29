@@ -41,4 +41,6 @@
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 
-(setq default-frame-alist '((undecorated . t)))
+(when (not (eq system-type 'darwin))
+  (setq default-frame-alist '((undecorated . t))))
+
