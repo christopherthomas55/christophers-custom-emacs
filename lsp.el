@@ -97,17 +97,13 @@
 (use-package company
   :ensure t
   :init
-  (setq company-backends '((company-capf company-dabbrev-code))))
+  ;; Minimal, could expand
+  (setq company-backends '((company-capf company-dabbrev-code company-abbrev company-files)))
+  (setq company-tooltip-align-annotations t)
 
-  ;; TODO - capf is very annoying for code, so maybe restrict to code modes (prog-mode)
-  ;;If you only want Company active while coding (and not in plain text files), do not use =global-company-mode=. Use this instead:
-  ;;#+begin_src elisp
-  ;;(add-hook 'prog-mode-hook 'company-mode)
-  ;;#+end_src
-  ;;(defun my/use-standard-completion ()
-  ;;  (setq-local completion-styles '(basic partial-completion)))
+  (add-hook 'prog-mode-hook 'company-mode)
+  )
 
-  ;;(add-hook 'prog-mode-hook #'my/use-standard-completion)
 
 (use-package which-key
     :ensure t
