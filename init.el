@@ -45,6 +45,11 @@
 (setq indent-tabs-mode nil)
 (setq tab-width 4)
 
+
+;; Setting smooth isntead of page scrolling. What is this, 1975?!
+(setq scroll-conservatively 101) ;; > 100 means "never jump"
+(setq scroll-margin 5)
+
 ;; Line wrapping is a must
 ;;(add-hook 'text-mode-hook 'visual-line-mode) 
 (global-visual-line-mode t)
@@ -330,12 +335,28 @@
   :config
   (setq ranger-show-hidden t) ; Show dotfiles
   (setq ranger-cleanup-eagerly t) ; Clean up buffers when moving to another directory
-  (setq ranger-cleanup-on-disable nil) ; Don't kill buffers on disable, I like having them around
+  (setq ranger-cleanup-on-disable nil) ; Don't kill buffers on disable (entry into other mode), I like having them around
   (setq ranger-preview-file t) ; Default to previewing file on the right
   (setq ranger-show-literal nil) ; Default to formatting
   (setq ranger-max-preview-size 10) ; Anything bigger than 10 mb not worth previewing
   (setq ranger-parent-depth 2) ; I like seeing a few parent folders for context
-  (ranger-override-dired-mode t))
+  (setq ranger-override-dired 'ranger) ; I also like starting in ranger
+  (ranger-override-dired-mode t)
+
+  ;; There's some strange evil mode interation going on so we force these keybindings to make sure previews work
+  ;; This in an opption but I am just going to use ranger mode as initial state
+  ;; (with-eval-after-load 'evil
+  ;;   (evil-define-key 'normal ranger-mode-map
+  ;;     (kbd "j") 'ranger-next-file
+  ;;     (kbd "k") 'ranger-prev-file
+  ;;     (kbd "h") 'ranger-up-directory
+  ;;     (kbd "l") 'ranger-find-file))
+)
+
+;; TODO this doesn't work and I need to figure it out
+;; This handles the weird evil mode interaction where I can't scroll the preview with j and k
+(evil-set-initial-state 'ranger-mode 'emacs)
+
 
 ;; Settings for my work mac
 (when (eq system-type 'darwin)
