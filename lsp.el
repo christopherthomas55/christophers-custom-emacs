@@ -93,13 +93,18 @@
   :ensure t
   )
 
-;; TODO - I think this interacts poorly with evil
 (use-package company
   :ensure t
   :init
   ;; Minimal, could expand
   (setq company-backends '((company-capf company-dabbrev-code company-abbrev company-files)))
   (setq company-tooltip-align-annotations t)
+
+  ;; This overlaps with copilot. I like the vim keybings anyways
+  ;; TODO - this is causing a warning on load
+  ;; Error (use-package): company/:init: Symbol’s value as variable is void: company-active-map
+  (define-key company-active-map (kbd "TAB") nil)
+  (define-key company-active-map (kbd "<tab>") nil)
 
   (add-hook 'prog-mode-hook 'company-mode)
   )
@@ -126,7 +131,7 @@
   :ensure t
 )
 
-;; PYTHON DEV ENV
+;; PYTHON DEV ENV - TODO not using
 ;; Pet finds virtual envs (very useful at EP)
 (use-package pet
   :ensure t
@@ -150,6 +155,7 @@
 
 ;; only on workmac for now
 (when (eq system-type 'darwin)
+  ;; Probably need to fix this
   (defun my/tab-override-function ()
     (interactive)
     (if (copilot--overlay-visible)
@@ -220,6 +226,12 @@
   ;; Have to run git config --global github.user christopherthomas55 first
   (setq auth-sources (list (file-name-concat user-emacs-directory ".authinfo")))
 
+  )
+
+(use-package mermaid-mode
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.mmd\\'" . mermaid-mode))
   )
 
 

@@ -203,37 +203,7 @@
   (global-set-key (kbd "C-c g") 'my/gptel-new-session)
 )
 
-;; Dired in sidebar and toggle open dir with tab
-;; TODO Look into dired-ranger and abo abo's dired hacks in general
-(use-package dired-sidebar
-  :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
-  :ensure t
-  :commands (dired-sidebar-toggle-sidebar)
-  :init
-  ;(add-hook 'dired-sidebar-mode-hook
-  ;; Commented is recommended from author. Idk so not turning on
-  ;          (lambda ()
-  ;            (unless (file-remote-p default-directory)
-  ;              (auto-revert-mode))))
-  :config
-  ;(push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
-  ;(push 'rotate-windows dired-sidebar-toggle-hidden-commands)
-  (setq dired-sidebar-subtree-line-prefix "---")
-  (setq dired-sidebar-theme 'icon)
-  )
 
-(use-package dired-subtree
-        :ensure t
-	:after (dired evil)
-	;; Was doing this but evil mode is weird
-        ;;:bind (:map dired-mode-map
-        ;;            ("<tab>" . dired-subtree-toggle)
-        ;;            ("TAB" . dired-subtree-toggle))
-	:init
-	(evil-define-key 'normal dired-mode-map (kbd "TAB") 'dired-subtree-toggle)
-	(evil-define-key 'normal dired-mode-map (kbd "<tab>") 'dired-subtree-toggle)
-	)
-		    
 ;; Quickscope is fun for moving with fFtT fast in evil mode
 (use-package evil-quickscope
   :ensure t
@@ -354,6 +324,18 @@
 ;; Right now only some web searches
 (load-file (file-name-concat user-emacs-directory "christophers-custom-emacs" "web-search.el"))
 (require 'web-search)
+
+(use-package ranger
+  :ensure t
+  :config
+  (setq ranger-show-hidden t) ; Show dotfiles
+  (setq ranger-cleanup-eagerly t) ; Clean up buffers when moving to another directory
+  (setq ranger-cleanup-on-disable nil) ; Don't kill buffers on disable, I like having them around
+  (setq ranger-preview-file t) ; Default to previewing file on the right
+  (setq ranger-show-literal nil) ; Default to formatting
+  (setq ranger-max-preview-size 10) ; Anything bigger than 10 mb not worth previewing
+  (setq ranger-parent-depth 2) ; I like seeing a few parent folders for context
+  (ranger-override-dired-mode t))
 
 ;; Settings for my work mac
 (when (eq system-type 'darwin)
