@@ -18,7 +18,7 @@
 
 
 ;; TODO This will need to get revamped eventually
-(setq my/data-drive "~/ubuntu-home")
+(setq my/data-drive "~/data")
 (setq custom-safe-themes t) ;; TODO - Load my lovely themes. Maybe this is risky?
 
 (setq backup-directory-alist '(("." . "~/.emacs.d/file-backups")))
@@ -30,7 +30,7 @@
 ;; Could listen on any connected machine, not just 127.0.0.1, but currently ssh forwarding
 ;;(setq server-host "0.0.0.0")
 ;;(setq server-host "127.0.0.1")
-(server-start)
+;;(server-start)
 
 ;; In emacs < 29 this helps with annoying key issues
 ;;(require 'gnu-elpa-keyring-update)

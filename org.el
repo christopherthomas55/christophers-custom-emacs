@@ -9,6 +9,9 @@
   ;; The @ and ! are just timestamp tracking. We could theoretically log more if you rtfm
   (setq org-todo-keywords '((sequence "TODO(t!)" "LINUX (l)" "CODING(c)" "READING(r)" "WRITING(w)" "BRAINSTORM(b)" "|" "DONE(d!)")))
 
+  ;; I like the look of this
+  (setq org-startup-indented t)
+
   (setq org-default-notes-file (concat org-directory "/notes.org"))
   (setq my/todo-file "~/org/hosted_org_notes/todos.org")
 
@@ -49,15 +52,15 @@
   ;; Set up habits
   (add-to-list 'org-modules 'org-habit)
   ;; I don't really use this as a hardcore time tracker
-  (setq org-agenda-span 1)
+  (setq org-agenda-span 10)
   (setq org-agenda-start-on-weekday nil)
-  (setq  org-agenda-start-day "-0d")
+  (setq  org-agenda-start-day "-3d")
   ;; I don't have many deadlines so I like seeing them
   (setq org-deadline-warning-days 180)
 
   ;; I just edited org agenda
   (setq  org-agenda-sorting-strategy
-	 '((agenda habit-up tag-up deadline-up alpha-up)
+	 '((agenda time-up habit-up tag-up timestamp-up deadline-up)
 	   (todo urgency-down category-keep)
 	   (tags urgency-down category-keep)
 	   (search category-keep)))
@@ -73,6 +76,12 @@
   (setq org-log-into-drawer t)
   ;; Native org agenda support for logs?
   (setq org-agenda-start-with-log-mode t)
+  (setq org-agenda-include-diary t)
+  (setq org-agenda-log-mode-items '(state))
+
+  ;; These show up as state changes
+  (setq org-agenda-skip-deadline-if-done t)
+  (setq org-agenda-skip-scheduled-if-done t)
 
   ;; Habits nicer
   (setq org-habit-preceding-days 20)
