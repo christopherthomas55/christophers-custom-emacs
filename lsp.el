@@ -95,6 +95,7 @@
   ;; This overlaps with copilot. I like the vim keybings anyways
   ;; TODO - this is causing a warning on load
   ;; Error (use-package): company/:init: Symbol’s value as variable is void: company-active-map
+  :config
   (define-key company-active-map (kbd "TAB") nil)
   (define-key company-active-map (kbd "<tab>") nil)
 
@@ -157,11 +158,9 @@
 ;; COPILOT
 (use-package editorconfig
   :ensure t)
-(use-package f
-  :ensure t)
 
-;; only on workmac for now
-(when (eq system-type 'darwin)
+;; only on workmac for now, now none
+(when (eq system-type 'ignore)
   ;; Probably need to fix this
   (defun my/tab-override-function ()
     (interactive)

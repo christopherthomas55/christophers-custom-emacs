@@ -170,6 +170,7 @@
   (if (file-directory-p "~/org/roam") () (make-directory "~/org/roam"))
   (setq org-roam-directory (file-truename "~/org/"))
   (setq org-roam-db-location (concat org-roam-directory "roam.sqlite"))
+  (org-roam-db-autosync-mode)
 
   (setq org-roam-node-display-template
 	(concat
@@ -262,7 +263,6 @@
 
 ;; Load org-roam db after startup
 ;; TODO - this may have  astartup performance cost
-(org-roam-db-autosync-mode)
 (org-roam-db-sync)
 
 ;; Webserver ui for this too, over port XXXX

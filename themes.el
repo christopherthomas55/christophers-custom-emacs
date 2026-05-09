@@ -22,7 +22,9 @@
   ;;(setq cthomas-light-themes '(modus-operandi-tinted whiteboard))
   (setq calendar-latitude 30.26)
   (setq calendar-longitude -97.7)
-  (defvar my-dark-themes '(grayscale gruvbox-dark-medium modus-vivendi zenburn nord))
+  ;; Gruvbox for now
+  ;;(defvar my-dark-themes '(grayscale gruvbox-dark-medium modus-vivendi zenburn nord))
+  (defvar my-dark-themes '(gruvbox-dark-medium))
   (defvar my-light-themes '(modus-operandi-tinted))
   ;; Change every 2 hours
   (setq circadian-themes `(("6:00" . ,my-dark-themes)

@@ -7,6 +7,10 @@
                             (ns-appearance . dark)
                             (ns-transparent-titlebar . t)))
 
+;; IDK, magit says this is important on my fresh work mac install
+(setq package-install-upgrade-built-in t)
+
+
 ;; Set up package.el to work with MELPA
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
@@ -15,6 +19,32 @@
 
 ;; Helpful package management
 (require 'use-package)
+
+
+
+;; Settings for my work mac
+;; This must be early in process
+(when (eq system-type 'darwin)
+  (progn
+	;; Default font size bigger
+	(set-face-attribute 'default nil :height 175)
+         ;; use gls since I have "advanced ordering" lol
+ 	(setq insert-directory-program "gls"
+               dired-use-ls-dired t)
+
+
+	;; Use more modern curl than what apple ships with
+	(setenv "PATH" (concat "/opt/homebrew/opt/curl/bin:" (getenv "PATH")))
+	(setq exec-path (cons "/opt/homebrew/opt/curl/bin" exec-path))
+
+	;; This is needed too for aws bedrock and may need to make sure curl doesn't hit conflict above! The upgraded curl (above)
+	;; needs to run first
+        (add-to-list 'exec-path "/opt/homebrew/bin")
+
+
+  )
+)
+
 
 
 ;; TODO This will need to get revamped eventually
@@ -113,49 +143,42 @@
 (load-file "~/.emacs.d/christophers-custom-emacs/writing.el")
 
 
-(use-package tramp
-  :ensure t
-  :config
-  (tramp-parse-sconfig "~/.ssh/config")
-  (setq tramp-default-method "ssh")
-
-  ;; All from this great article https://coredumped.dev/2025/06/18/making-tramp-go-brrrr./
-  (connection-local-set-profile-variables
-   'remote-direct-async-process
-   '((tramp-direct-async-process . t)))
-  (connection-local-set-profiles
-   '(:application tramp :protocol "ssh") ; Changed from "scp"
-   'remote-direct-async-process)
-  
-  ;; SPEED FIXES - cache for 200 seconds
-  (setq remote-file-name-inhibit-cache 200) ;; Can't make null....cause claude code will run
-  (setq remote-file-name-inhibit-locks t)  ;; Can do this if one emacs session
-  (setq remote-use-scp-direct-remote-copying t)
-  (setq remote-file-name-inhibit-auto-save-visited t)
-
-  (setq vc-handled-backends '(Git)) ; Faster: only checks for Git. TBH I don't know exactly what this does but I'm trying to speed up tramp and it's in the faq
-  (setq tramp-verbose 1)            ; Reduce logging
-
-  (defun ssh ()
-    "Open find-file pre-populated with the SSH prefix."
-    (interactive)
-    (find-file (read-file-name "Remote file: " "/ssh:")))
-
-  (setq magit-tramp-pipe-stty-settings 'pty)
-
-     
-
-)
-
 ;; LLM chat interface
 (use-package gptel
   :ensure t
   :init
-  ;; Load GEMINI_API_KEY=VAL\n from secrets file
-  (setq gptel-backend (gptel-make-gemini "Gemini" :key (load-secret "GEMINI_API_KEY") :stream t))
+  (if (eq system-type 'darwin)
+    (progn
+      ;; OPTIONAL configuration
+
+      (setq gptel-log-level t)
+
+      (setq gptel-model 'claude-sonnet-4-6
+          gptel-backend
+          (gptel-make-bedrock "AWS"
+            ;; optionally enable streaming
+            :stream t
+            ;; optionally specify the aws profile
+	    ;; TODO - parameterize
+	    :aws-profile "GenAI-Dev-457090734503"
+            :region "us-east-1"
+            ;; subset of gptel--bedrock-models
+            :models '(claude-sonnet-4-6)
+            ;; Model region for cross-region inference profiles. Required for models such
+            ;; as Claude without on-demand throughput support. One of 'apac, 'eu or 'us.
+            ;; https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-use.html
+            :model-region 'us
+	    )))
+    (progn
+      ;; Load GEMINI_API_KEY=VAL\n from secrets file
+      (setq gptel-backend (gptel-make-gemini "Gemini" :key (load-secret "GEMINI_API_KEY") :stream t))
+      ;; TODO route to gemma if rate limited
+      (setq gptel-model 'gemini-3-flash-preview))
+  )
+
+
+
   ;; I wish
-  ;; TODO route to gemma if rate limited
-  (setq gptel-model 'gemini-3-flash-preview)
   (setq gptel-default-mode 'org-mode)
 
   (defun my/gptel-new-session ()
@@ -205,7 +228,10 @@
 
 
   ;; For now C-c g is gpt start
-  (global-set-key (kbd "C-c g") 'my/gptel-new-session)
+  (global-set-key (kbd "C-c g g") 'my/gptel-new-session)
+  (global-set-key (kbd "C-c g s") 'gptel-send)
+  (global-set-key (kbd "C-c g r") 'gptel-rewrite)
+  (global-set-key (kbd "C-c g m") 'gptel-menu)  ; bonus - very useful!
 )
 
 
@@ -332,6 +358,9 @@
 
 (use-package ranger
   :ensure t
+  ;; Important that this is in bind so dired redirects immediately
+  :bind ([remap dired] . deer)
+
   :config
   (setq ranger-show-hidden t) ; Show dotfiles
   (setq ranger-cleanup-eagerly t) ; Clean up buffers when moving to another directory
@@ -339,8 +368,8 @@
   (setq ranger-preview-file t) ; Default to previewing file on the right
   (setq ranger-show-literal nil) ; Default to formatting
   (setq ranger-max-preview-size 10) ; Anything bigger than 10 mb not worth previewing
-  (setq ranger-parent-depth 2) ; I like seeing a few parent folders for context
-  (setq ranger-override-dired 'ranger) ; I also like starting in ranger
+  (setq ranger-parent-depth 1) ; I like just 1 parent
+  (setq ranger-override-dired t) ; Set to 'ranger instead to start in ranger, i got sick of it
   (ranger-override-dired-mode t)
 
   ;; There's some strange evil mode interation going on so we force these keybindings to make sure previews work
@@ -358,32 +387,21 @@
 (evil-set-initial-state 'ranger-mode 'emacs)
 
 
-;; Settings for my work mac
-(when (eq system-type 'darwin)
-  (progn
-        ;; use gls since I have "advanced ordering" lol
-	(setq insert-directory-program "gls"
-              dired-use-ls-dired t)
-	;; Default font size bigger
-	(set-face-attribute 'default nil :height 175)
+;; Term emulator?
+(use-package vterm
+    :ensure t)
 
-	;; I am only setting up jira on my work emacs lol
-	;; TODO - integrate with evil mode
-	(use-package jira
-	  :ensure t
-	  :config
-	  (setq jira-base-url "https://simplerpostage.atlassian.net") ;; Jira instance URL
-	  (setq jira-username "cthomas@easypost.com") ;; Jira username (usually, an email)
-	  ;; API token for Jira
-	  ;; See https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/
-	  (setq jira-token (load-secret "JIRA_TOKEN"))
-	  (setq jira-token-is-personal-access-token nil)
-	  (setq jira-api-version 3) ;; Version 2 is also allowed
-	  :init 
-	  (global-set-key (kbd "C-x j") 'jira-issues)
-	  )
+;; Use the prefix argument to force new buffer
+(defun my/new-vterm ()
+  (interactive)
+  (vterm t)) ; t forces new buffer
+(global-set-key (kbd "C-x m") 'vterm)
 
-  )
-)
+;; Terminals named by last command
+(defun my/vterm-rename-buffer-by-command (command)
+  (when (and command (not (string-empty-p command)))
+    (rename-buffer (format "vterm: %s" command) t)))
 
+(add-hook 'vterm-cmd-hook #'my/vterm-rename-buffer-by-command)
 
+(setq vterm-buffer-name-string "vterm %s")
