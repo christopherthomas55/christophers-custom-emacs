@@ -7,7 +7,7 @@
   (when (memq window-system '(mac ns x))
     ;; These are for claude code.
     (exec-path-from-shell-copy-envs
-     '("CAUDE_CODE_USE_VERTEX" "ANTHROPIC_VERTEX_PROJECT_ID" "GOOGLE_CLOUD_PROJECT" "CLOUD_ML_REGION"))
+     '("CLAUDE_CODE_USE_VERTEX" "ANTHROPIC_VERTEX_PROJECT_ID" "GOOGLE_CLOUD_PROJECT" "CLOUD_ML_REGION"))
     ;; Something something go needs exec-path-from-shell
     )
   (exec-path-from-shell-initialize))
