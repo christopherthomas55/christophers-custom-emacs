@@ -395,7 +395,6 @@
 (defun my/new-vterm ()
   (interactive)
   (vterm t)) ; t forces new buffer
-(global-set-key (kbd "C-x m") 'vterm)
 
 ;; Terminals named by last command
 (defun my/vterm-rename-buffer-by-command (command)
@@ -405,3 +404,20 @@
 (add-hook 'vterm-cmd-hook #'my/vterm-rename-buffer-by-command)
 
 (setq vterm-buffer-name-string "vterm %s")
+
+
+(use-package ghostel :ensure t)
+(use-package evil-ghostel
+    :after (ghostel evil)
+    :hook (ghostel-mode . evil-ghostel-mode))
+(global-set-key (kbd "C-x m") 'ghostel)
+
+;; Copying out of a ghostel terminal (e.g. tmux): C-c C-t enters copy mode,
+;; then v/V + motion, y to copy, q to exit. In insert state letters are
+;; self-insert keys (fast-exit bails out of copy mode) and with tmux's
+;; alt-screen up ESC is routed to the terminal, so force normal state when
+;; copy mode engages - then vi selection just works.
+(advice-add 'ghostel-copy-mode :after (lambda (&rest _)
+  (when (and (eq (bound-and-true-p ghostel--input-mode) 'copy)
+             (not (eq (bound-and-true-p evil-state) 'normal)))
+    (evil-force-normal-state))))
